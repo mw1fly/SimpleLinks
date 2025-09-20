@@ -194,83 +194,69 @@ a.two:hover {color:Aqua;}
 
   <table id="linkTable"></table>
 
-  <script>
-    async function loadCSVAndBuildTable1() {
-      const response = await fetch('data/links.csv');
-      const text = await response.text();
-      const lines = text.trim().split('\n');
-
-      const table = document.getElementById('linkTableTop');
-      const cellsPerRow = 10;
-
-      for (let i = 0; i < lines.length; i += cellsPerRow) {
-        const row = document.createElement('tr');
-
-        for (let j = 0; j < cellsPerRow; j++) {
-          const lineIndex = i + j;
-          if (lineIndex >= lines.length) break;
-
-          const line = lines[lineIndex];
-          const [HYPERLINK, TYPE, COMMENT, PICTURE] = line.split(',');
-
-          const cell = document.createElement('td');
-          cell.innerHTML = `
-            <a href="${HYPERLINK}">
-              <img src="${PICTURE}" alt="${TYPE}" style="width:128px;height:66px">
-            </a>
-            <a href="${HYPERLINK}">${COMMENT}</a>
-          `;
-          row.appendChild(cell);
-        }
-
-        table.appendChild(row);
-      }
-    }
-    loadCSVAndBuildTable1();
-  </script>
-
-
-  <script>
-    async function loadCSVAndBuildTable() {
-      const response = await fetch('data/newlinks.csv');
-      const text = await response.text();
-      const lines = text.trim().split('\n');
-
-      const table = document.getElementById('linkTable');
-      const cellsPerRow = 4;
-
-      for (let i = 0; i < lines.length; i += cellsPerRow) {
-        const row = document.createElement('tr');
-
-        for (let j = 0; j < cellsPerRow; j++) {
-          const lineIndex = i + j;
-          if (lineIndex >= lines.length) break;
-
-          const line = lines[lineIndex];
-          const [HYPERLINK, TYPE, COMMENT, PICTURE] = line.split(',');
-
-          const cell = document.createElement('td');
-          cell.innerHTML = `
-            <a href="${HYPERLINK}">
-              <img src="${PICTURE}" alt="${TYPE}">
-            </a>
-            <a class="two" href="${HYPERLINK}">${COMMENT}</a>
-          `;
-          row.appendChild(cell);
-        }
-
-        table.appendChild(row);
-      }
-    }
-
-    loadCSVAndBuildTable();
-  </script>
 <script>
-function myFunction() {
-   var element = document.body;
-   element.classList.toggle("light-mode");
+async function loadJSONAndBuildTable() {
+  const response = await fetch('data/links.json');
+  const links = await response.json();
+
+  const table = document.getElementById('linkTable');
+  const cellsPerRow = 10;
+
+  for (let i = 0; i < links.length; i += cellsPerRow) {
+    const row = document.createElement('tr');
+
+    for (let j = 0; j < cellsPerRow; j++) {
+      const item = links[i + j];
+      if (!item) break;
+
+      const cell = document.createElement('td');
+      cell.innerHTML = `
+        <a href="${item.url}">
+          <img src="${item.image}" alt="${item.type}">
+        </a>
+        <a class="two" href="${item.url}">${item.comment}</a>
+      `;
+      row.appendChild(cell);
+    }
+
+    table.appendChild(row);
+  }
 }
+
+loadJSONAndBuildTable();
 </script>
 
-</body>
-</html>
+
+<script>
+async function loadJSONAndBuildTable() {
+  const response = await fetch('data/newlinks.json');
+  const links = await response.json();
+
+  const table = document.getElementById('linkTable');
+  const cellsPerRow = 4;
+
+  for (let i = 0; i < links.length; i += cellsPerRow) {
+    const row = document.createElement('tr');
+
+    for (let j = 0; j < cellsPerRow; j++) {
+      const item = links[i + j];
+      if (!item) break;
+
+      const cell = document.createElement('td');
+      cell.innerHTML = `
+        <a href="${item.url}">
+          <img src="${item.image}" alt="${item.type}">
+        </a>
+        <a class="two" href="${item.url}">${item.comment}</a>
+      `;
+      row.appendChild(cell);
+    }
+
+    table.appendChild(row);
+  }
+}
+
+loadJSONAndBuildTable();
+</script>
+
+
