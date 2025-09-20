@@ -1,0 +1,13 @@
+http://192.168.0.65:8080,Search Engine,SearXNG,images/searXNG.jpg 
+http://192.168.0.11:8006,VM,Proxmox,images/img-04.jpg 
+https://192.168.0.2:10000,Public,Virtualmin - web-public,images/Virtualmin.png 
+http://192.168.0.13/admin,Internal,Pi Hole,images/pihole.jpg 
+http://192.168.0.1,Public,Firewall,images/WoodRouter.jpg 
+http://192.168.0.3,Internal,IOT Router,images/iot.jpg 
+http://192.168.0.100:81,Public,NGINX Proxy Manager,images/nginx_pm.png 
+https://www.duckdns.org,website,DuckDNS,images/duckdns.png 
+https://dash.cloudflare.com/login,website,Cloudflare,images/cloudflare.jpg 
+https://www.123reg.co.uk,website,123 Reg,images/123Reg.jpeg 
+https://www.duckdns.org,Public,Owncloud,images/owncloud.png 
+http://192.168.0.200:26000,Internal,iVenTOY,images/iventoy.png 
+http://192.168.0.66:8080,Search Engine 2,SearXNG,images/tuntun.jpg

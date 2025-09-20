@@ -1,0 +1,8 @@
+services:
+  linkportal:
+    build: ./docker
+    container_name: linkportal
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
