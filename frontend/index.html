@@ -195,68 +195,41 @@ a.two:hover {color:Aqua;}
   <table id="linkTable"></table>
 
 <script>
-async function loadJSONAndBuildTable() {
-  const response = await fetch('data/links.json');
-  const links = await response.json();
+  async function loadLinksFromAPI() {
+    try {
+      const response = await fetch("http://localhost:5000/links");
+      const links = await response.json();
+      const table = document.getElementById('linkTable');
+      const cellsPerRow = 4;
 
-  const table = document.getElementById('linkTable');
-  const cellsPerRow = 10;
+      for (let i = 0; i < links.length; i += cellsPerRow) {
+        const row = document.createElement('tr');
 
-  for (let i = 0; i < links.length; i += cellsPerRow) {
-    const row = document.createElement('tr');
+        for (let j = 0; j < cellsPerRow; j++) {
+          const lineIndex = i + j;
+          if (lineIndex >= links.length) break;
 
-    for (let j = 0; j < cellsPerRow; j++) {
-      const item = links[i + j];
-      if (!item) break;
+          const { url, type, comment, image } = links[lineIndex];
 
-      const cell = document.createElement('td');
-      cell.innerHTML = `
-        <a href="${item.url}">
-          <img src="${item.image}" alt="${item.type}">
-        </a>
-        <a class="two" href="${item.url}">${item.comment}</a>
-      `;
-      row.appendChild(cell);
+          const cell = document.createElement('td');
+          cell.innerHTML = `
+            <a href="${url}">
+              <img src="${image}" alt="${type}">
+            </a>
+            <a class="two" href="${url}">${comment}</a>
+          `;
+          row.appendChild(cell);
+        }
+
+        table.appendChild(row);
+      }
+    } catch (error) {
+      console.error("Failed to load links:", error);
     }
-
-    table.appendChild(row);
   }
-}
 
-loadJSONAndBuildTable();
+  loadLinksFromAPI();
 </script>
-
-
-<script>
-async function loadJSONAndBuildTable() {
-  const response = await fetch('data/newlinks.json');
-  const links = await response.json();
-
-  const table = document.getElementById('linkTable');
-  const cellsPerRow = 4;
-
-  for (let i = 0; i < links.length; i += cellsPerRow) {
-    const row = document.createElement('tr');
-
-    for (let j = 0; j < cellsPerRow; j++) {
-      const item = links[i + j];
-      if (!item) break;
-
-      const cell = document.createElement('td');
-      cell.innerHTML = `
-        <a href="${item.url}">
-          <img src="${item.image}" alt="${item.type}">
-        </a>
-        <a class="two" href="${item.url}">${item.comment}</a>
-      `;
-      row.appendChild(cell);
-    }
-
-    table.appendChild(row);
-  }
-}
-
-loadJSONAndBuildTable();
-</script>
-
+</body>
+</html>
 
