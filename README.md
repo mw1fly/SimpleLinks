@@ -68,5 +68,9 @@ At present it’s just a static page → anyone can see everything.
 cd SimpleLinks
 docker compose up --build
 
+```
+###
 
+Browse to http://localhost:8080
 
+###

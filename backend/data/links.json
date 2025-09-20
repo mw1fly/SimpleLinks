@@ -1,0 +1,26 @@
+[
+  {
+    "url": "http://192.168.0.65:8080",
+    "type": "Search Engine",
+    "comment": "SearXNG",
+    "image": "images/searXNG.jpg"
+  },
+  {
+    "url": "http://192.168.0.11:8006",
+    "type": "VM",
+    "comment": "Proxmox",
+    "image": "images/img-04.jpg"
+  },
+  {
+    "url": "https://192.168.0.2:10000",
+    "type": "Public",
+    "comment": "Virtualmin - web-public",
+    "image": "images/Virtualmin.png"
+  },
+  {
+    "url": "https://example.com",
+    "type": "Test",
+    "comment": "Example",
+    "image": "images/test.png"
+  }
+]
