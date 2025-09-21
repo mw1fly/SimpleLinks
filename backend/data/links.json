@@ -1,6 +1,6 @@
 [
   {
-    "url": "http://192.168.0.65:8080",
+    "url": "http://192.168.0.64:8080",
     "type": "Search Engine",
     "comment": "SearXNG",
     "image": "images/searXNG.jpg"
@@ -21,24 +21,36 @@
     "url": "https://example.com",
     "type": "Test",
     "comment": "Example",
-    "image": "images/test.png"
-  },
-  {
-    "url": "https://1.1.1.1",
-    "type": "namserver",
-    "comment": "a nameserver",
-    "image": "images/google.png"
+    "image": "images/pic3.png"
   },
   {
     "url": "http://8.8.8.8",
     "type": "dns",
     "comment": "googledns",
-    "image": ""
+    "image": "images/img-13.jpg"
   },
   {
     "url": "http://8.8.8.9",
     "type": "dns",
     "comment": "googledns1",
     "image": "images/Screenshot_20250918_161229.png"
+  },
+  {
+    "url": "test2",
+    "type": "test2",
+    "comment": "test2",
+    "image": "images/Untitled.jpeg"
+  },
+  {
+    "url": "test4",
+    "type": "test4",
+    "comment": "test4",
+    "image": "images/munin.png"
+  },
+  {
+    "url": "1.2.3.4",
+    "type": "junk",
+    "comment": "1234",
+    "image": "images/agilent.jpeg"
   }
 ]

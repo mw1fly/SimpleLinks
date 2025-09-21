@@ -80,6 +80,12 @@ def update_link(index):
 def serve_admin():
     return send_from_directory(app.static_folder, "admin.html")
 
+@app.route("/images-list")
+def images_list():
+    folder = os.path.join(app.static_folder, "images")
+    files = os.listdir(folder) if os.path.exists(folder) else []
+    return jsonify([f"images/{f}" for f in files])
+
 
 # --- Serve Frontend ---
 @app.route("/")
