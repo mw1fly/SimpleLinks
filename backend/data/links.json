@@ -28,5 +28,17 @@
     "type": "namserver",
     "comment": "a nameserver",
     "image": "images/google.png"
+  },
+  {
+    "url": "http://8.8.8.8",
+    "type": "dns",
+    "comment": "googledns",
+    "image": ""
+  },
+  {
+    "url": "http://8.8.8.9",
+    "type": "dns",
+    "comment": "googledns1",
+    "image": "images/Screenshot_20250918_161229.png"
   }
 ]

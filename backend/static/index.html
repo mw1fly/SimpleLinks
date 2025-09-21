@@ -197,24 +197,6 @@ a.two:hover {color:Aqua;}
 
 <hr>
 
-<h2>Admin Panel</h2>
-
-<form id="addForm" enctype="multipart/form-data">
-  <input type="text" id="url" placeholder="URL" required>
-  <input type="text" id="type" placeholder="Type">
-  <input type="text" id="comment" placeholder="Comment">
-  <input type="file" id="imageFile" accept="image/*">
-  <button type="submit">Add Link</button>
-</form>
-
-<br>
-
-<form id="deleteForm">
-  <input type="number" id="deleteIndex" placeholder="Index #" required>
-  <button type="submit">Delete Link</button>
-</form>
-
-
 <script>
   async function loadLinksFromAPI() {
     try {

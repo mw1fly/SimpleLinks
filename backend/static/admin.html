@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SimpleLinks Admin Panel</title>
+<style>
+body { font-family: sans-serif; margin: 20px; background-color: #111; color: white; }
+input, button { margin: 5px; padding: 8px; }
+h1, h2 { text-align: center; }
+form { margin-bottom: 20px; }
+#linksTable { width: 100%; border-collapse: collapse; margin-top: 20px; }
+#linksTable td, #linksTable th { border: 1px solid #444; padding: 8px; text-align: left; }
+#linksTable th { background-color: #222; }
+</style>
+</head>
+<body>
+
+<h1>SimpleLinks Admin Panel</h1>
+
+<!-- Add Link Form -->
+<h2>Add Link</h2>
+<form id="addForm">
+  <input type="text" id="url" placeholder="URL" required>
+  <input type="text" id="type" placeholder="Type">
+  <input type="text" id="comment" placeholder="Comment">
+  <input type="file" id="imageFile" accept="image/*">
+  <button type="submit">Add Link</button>
+</form>
+
+<!-- Delete Link Form -->
+<h2>Delete Link</h2>
+<form id="deleteForm">
+  <input type="number" id="deleteIndex" placeholder="Index #" required>
+  <button type="submit">Delete Link</button>
+</form>
+
+<!-- Links Table -->
+<h2>Current Links</h2>
+<table id="linksTable">
+  <thead>
+    <tr>
+      <th>Index</th>
+      <th>URL</th>
+      <th>Type</th>
+      <th>Comment</th>
+      <th>Image</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+// --- Load Links ---
+async function loadLinks() {
+  const resp = await fetch("/links");
+  const links = await resp.json();
+  const tbody = document.querySelector("#linksTable tbody");
+  tbody.innerHTML = "";
+  links.forEach((link, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${idx}</td>
+      <td><a href="${link.url}" target="_blank">${link.url}</a></td>
+      <td>${link.type || ""}</td>
+      <td>${link.comment || ""}</td>
+      <td>${link.image ? `<img src="${link.image}" width="80">` : ""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// --- Add Link ---
+document.getElementById("addForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const url = document.getElementById("url").value;
+  const type = document.getElementById("type").value;
+  const comment = document.getElementById("comment").value;
+  const fileInput = document.getElementById("imageFile");
+
+  let imagePath = "";
+
+  // Upload image if selected
+  if (fileInput.files.length > 0) {
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const uploadResp = await fetch("/upload", { method: "POST", body: formData });
+    if (uploadResp.ok) {
+      const result = await uploadResp.json();
+      imagePath = result.path;
+    } else {
+      alert("Image upload failed");
+      return;
+    }
+  }
+
+  // Add link
+  const addResp = await fetch("/links", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, type, comment, image: imagePath })
+  });
+  if (addResp.ok) {
+    alert("Link added!");
+    loadLinks();
+    document.getElementById("addForm").reset();
+  } else {
+    alert("Failed to add link");
+  }
+});
+
+// --- Delete Link ---
+document.getElementById("deleteForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const index = document.getElementById("deleteIndex").value;
+  const resp = await fetch(`/links/${index}`, { method: "DELETE" });
+  if (resp.ok) {
+    alert("Link deleted!");
+    loadLinks();
+    document.getElementById("deleteForm").reset();
+  } else {
+    alert("Failed to delete link");
+  }
+});
+
+// --- Initial load ---
+loadLinks();
+</script>
+
+</body>
+</html>

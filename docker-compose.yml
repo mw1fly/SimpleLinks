@@ -1,8 +1,10 @@
 services:
   linkportal:
-    build: ./docker
+    build: ./backend
     container_name: linkportal
     ports:
-      - "8080:80"
+      - "5000:5000"
     volumes:
-      - ./frontend:/usr/share/nginx/html:ro
+      - ./backend/data:/app/data   # persist JSON edits
+      - ./backend/static/images:/app/static/images  # persist images
+
