@@ -1,9 +1,106 @@
+/* --- Topnav container --- */
+.topnav {
+    width: 100%;
+    background-color: #0d4080;
+    border-radius: 25px;
+    padding: 10px 0;
+}
+
+/* Flex container for topnav items */
+.topnav-content {
+    display: flex;
+    align-items: center;          /* vertical centering */
+    justify-content: space-between; /* search bar left, title center, button right */
+    width: 90%;
+    margin: 0 auto;
+}
+
+/* --- Search container --- */
+.search-container {
+    display: flex;
+    align-items: center;          /* vertical centering for image + form */
+    gap: 8px;                     /* spacing between image and input */
+}
+
+/* Search image */
+.search-container img {
+    height: 80px;                 /* fixed height for compact topnav */
+    width: auto;
+}
+
+/* Search form */
+.search-container form {
+    display: flex;
+    align-items: center;          /* vertically center input + button */
+    gap: 4px;                     /* spacing between input and button */
+}
+
+.search-container input,
+.search-container button {
+    height: 36px;          /* same height */
+    font-size: 16px;
+    padding: 0 8px;        /* horizontal padding only */
+    margin: 0;             /* remove default margin */
+    line-height: normal;   /* let flex align vertically */
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.search-container button {
+    height: 36px;           /* same as input */
+    padding: 0 8px;         /* remove top/bottom padding */
+    margin: 0;
+    line-height: 36px;      /* match height for vertical centering */
+    display: flex;
+    align-items: center;    /* center text vertically */
+    justify-content: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff; /* or whatever your button color is */
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+
+.search-container form button:hover {
+    background-color: #ccc;
+}
+
+/* --- Title in topnav --- */
+.topnav h1 {
+    margin: 0;
+    font-size: 24px;
+    color: white;
+    text-align: center;
+    flex: 1; /* allows title to stay centered */
+}
+
+/* --- Light mode toggle button --- */
+.topnav .light-toggle {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #008CBA;
+    color: white;
+    transition: background 0.2s ease;
+}
+
+.topnav .light-toggle:hover {
+    background-color: #0072a0;
+}
+
   body {
     font-family: sans-serif;
     margin: 20px;
     background-color: black;
     color: white;
   }
+
+
 .light-mode {
   background-color: white;
   color: black;

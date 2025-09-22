@@ -1,0 +1,27 @@
+{
+  "search": {
+    "engine": "duckduckgo",
+    "engines": [
+      {
+        "name": "google",
+        "url": "https://www.google.com/search?q=",
+        "logo": "images/google.png"
+      },
+      {
+        "name": "duckduckgo",
+        "url": "https://duckduckgo.com/",
+        "logo": "images/duckduckgo.png"
+      },
+      {
+        "name": "searxng",
+        "url": "https://my-searx-instance/search?q=",
+        "logo": "images/searxng.png"
+      },
+      {
+        "name": "google1",
+        "url": "https://www.google.com/search?q=",
+        "logo": "images/google.png"
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <title>Rich's Internal Links</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/link.png') }}">
+</head>
+<body>
+
+<div class="topnav">
+  <div class="topnav-content">
+    <div class="search-container">
+        <img id="searchLogo" src="" alt="Search Engine">
+        <form id="searchForm" method="get">
+            <input type="text" name="q" placeholder="Search...">
+            <input type="submit" value="Search">
+        </form>
+    </div>
+
+    <!-- Title -->
+    <h1>Internal Links</h1>
+
+    <!-- Light toggle -->
+    <button class="light-toggle" onclick="myFunction()">Toggle Light Mode</button>
+
+  </div>
+</div>
+
+  <br>
+  <div class="richnav">
+    <table id="linkTableTop"></table>
+  </div>
+
+  <table id="linkTable"></table>
+
+  <hr>
+  <!-- everything else in your JS stays the same -->
+  <script>
+    async function loadLinksFromAPI() {
+      try {
+        const response = await fetch("/links");
+        const links = await response.json();
+        const table = document.getElementById('linkTable');
+        const cellsPerRow = 4;
+
+        for (let i = 0; i < links.length; i += cellsPerRow) {
+          const row = document.createElement('tr');
+          for (let j = 0; j < cellsPerRow; j++) {
+            const lineIndex = i + j;
+            if (lineIndex >= links.length) break;
+
+            const { url, type, comment, image } = links[lineIndex];
+            const cell = document.createElement('td');
+            cell.innerHTML = `
+              <a href="${url}">
+                <img src="${image}" alt="${type}">
+              </a>
+              <a class="two" href="${url}">${comment}</a>
+            `;
+            row.appendChild(cell);
+          }
+          table.appendChild(row);
+        }
+      } catch (error) {
+        console.error("Failed to load links:", error);
+      }
+    }
+
+    loadLinksFromAPI();
+  </script>
+
+  <script>
+  function myFunction() {
+    var element = document.body;
+    element.classList.toggle("light-mode");
+  }
+  </script>
+
+<script>
+async function setupSearchBar() {
+  try {
+    const resp = await fetch("/config");
+    const cfg = await resp.json();
+    const engineName = cfg.search.engine;
+    const engines = cfg.search.engines || [];
+
+    const engine = engines.find(e => e.name === engineName) || engines[0];
+
+    const form = document.getElementById("searchForm");
+    const logo = document.getElementById("searchLogo");
+
+    if (engine) {
+      form.action = engine.url;
+      logo.src = "/" + engine.logo;
+      logo.alt = engine.label;
+    }
+  } catch (err) {
+    console.error("Failed to load search config:", err);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", setupSearchBar);
+</script>
+
+
+</body>
+</html>

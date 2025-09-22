@@ -64,11 +64,6 @@ a:active {
 }
 
 
-
-
-
-
-
 /* align content vertically */
 #/* Make image cells consistent and centered           *** Best so far *** */
 ##linksTable td:nth-child(4) {
@@ -97,15 +92,33 @@ form input, form button {
     font-size: 12px;         /* smaller text */
 }
 
-
-
-
 </style>
 </head>
 <body>
 
 <h1>SimpleLinks Admin Panel</h1>
 
+<!-- Search Engines Management -->
+<h2>Search Engine Settings</h2>
+<form id="engineForm">
+  <label for="activeEngineSelect">Select Engine</label>
+  <select id="activeEngineSelect"></select>
+  <!-- Dropdown to select active engine -->
+  <button type="button" id="setActiveEngine">Set Active</button>
+
+  <label for="engineName">Name</label>
+  <input type="text" id="engineName">
+
+  <label for="engineURL">Search URL</label>
+  <input type="text" id="engineURL">
+
+  <label for="engineLogo">Logo Path</label>
+  <input type="text" id="engineLogo">
+
+  <button type="submit">Add / Update Engine</button>
+  <button type="button" id="deleteEngine">Delete Engine</button>
+
+</form>
 <!-- Add Link Form -->
 <h2>Add Link</h2>
 <form id="addForm">
@@ -192,7 +205,112 @@ form input, form button {
 }
 
 </style>
+<script>
+async function loadEngines() {
+  // Fetch current config
+  const resp = await fetch("/config");
+  const cfg = await resp.json();
+  const engines = cfg.search?.engines || [];
+  const current = cfg.search?.engine || "";
 
+  const select = document.getElementById("activeEngineSelect");
+  const nameInput = document.getElementById("engineName");
+  const urlInput = document.getElementById("engineURL");
+  const logoInput = document.getElementById("engineLogo");
+
+  // Populate dropdown
+  select.innerHTML = "";
+  engines.forEach(e => {
+    const opt = document.createElement("option");
+    opt.value = e.name;
+    opt.textContent = e.name;
+    if (e.name === current) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  // Show selected engine details
+  const selectedEngine = engines.find(e => e.name === current) || {};
+  nameInput.value = selectedEngine.name || "";
+  urlInput.value = selectedEngine.url || "";
+  logoInput.value = selectedEngine.logo || "";
+
+  // Update textboxes when selection changes
+  select.addEventListener("change", () => {
+    const engine = engines.find(e => e.name === select.value) || {};
+    nameInput.value = engine.name || "";
+    urlInput.value = engine.url || "";
+    logoInput.value = engine.logo || "";
+  });
+}
+
+// Add / Update engine
+document.getElementById("engineForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("engineName").value.trim();
+  const url = document.getElementById("engineURL").value.trim();
+  const logo = document.getElementById("engineLogo").value.trim();
+
+  const resp = await fetch("/config/engines", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, url, logo })
+  });
+
+  if (resp.ok) {
+    loadEngines();
+    alert("Engine added/updated!");
+  } else {
+    alert("Failed to add/update engine");
+  }
+});
+
+// Delete selected engine
+document.getElementById("deleteEngine").addEventListener("click", async () => {
+  const select = document.getElementById("activeEngineSelect");
+  const name = select.value;
+  if (!name) return;
+  if (!confirm(`Delete engine "${name}"?`)) return;
+
+  const resp = await fetch(`/config/engines/${encodeURIComponent(name)}`, {
+    method: "DELETE"
+  });
+
+  if (resp.ok) {
+    loadEngines();
+    alert("Engine deleted!");
+  } else {
+    alert("Failed to delete engine");
+  }
+});
+
+// Set active engine
+document.getElementById("setActiveEngine").addEventListener("click", async () => {
+  const select = document.getElementById("activeEngineSelect");
+  const selected = select.value;
+  if (!selected) return;
+
+  const resp = await fetch("/config/active", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ engine: selected })
+  });
+
+  if (resp.ok) {
+    alert(`Active engine set to ${selected}`);
+    loadEngines();       // refresh dropdown + fields
+    if (typeof setupSearchBar === "function") {
+      setupSearchBar();  // refresh topnav logo + search
+    }
+  } else {
+    alert("Failed to set active engine");
+  }
+});
+
+// Initial load
+window.addEventListener("DOMContentLoaded", loadEngines);
+</script>
+
+// Links 
 
 <script>
 // --- Load existing images into Add Link form ---
