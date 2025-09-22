@@ -7,4 +7,6 @@ services:
     volumes:
       - ./backend/data:/app/data   # persist JSON edits
       - ./backend/static/images:/app/static/images  # persist images
-
+    environment:
+      - ADMIN_PASSWORD=mysupersecret
+      - SECRET_KEY=00b28275ee517e72eab36a606a635e80

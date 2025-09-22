@@ -168,3 +168,23 @@ color: white;
 border-radius: 8px;
 }
 
+/* Form styling for add/edit panels */
+.modal-content label {
+    display: block;        /* put label on its own line */
+    margin-top: 8px;       /* spacing above each label */
+    font-weight: bold;     /* make it stand out */
+    font-size: 13px;
+    color: #ddd;           /* lighter text for dark mode */
+}
+
+.modal-content input,
+.modal-content select {
+    width: 100%;           /* make inputs stretch across panel */
+    padding: 6px 8px;
+    margin-top: 2px;       /* small gap below label */
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #222;
+    color: #eee;
+    font-size: 14px;
+}

@@ -35,6 +35,71 @@ a:hover {
 a:active {
   color: blue;
 }
+
+/* admin panel table tweaks */
+#linksTable td, #linksTable th {
+    border: 1px solid #444;
+    padding: 4px 6px;  /* reduce padding */
+    text-align: left;
+    vertical-align: middle;  
+}
+/* Style the Actions column as a 2x2 grid */
+
+#linksTable td.actions {
+    text-align: center;
+    vertical-align: middle;
+}
+
+#linksTable td.actions div {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 4px;  /* spacing between buttons */
+    justify-content: center;
+}
+
+#linksTable td.actions button {
+    padding: 4px 6px;
+    font-size: 12px;
+    min-width: 50px; /* keep consistent size */
+}
+
+
+
+
+
+
+
+/* align content vertically */
+#/* Make image cells consistent and centered           *** Best so far *** */
+##linksTable td:nth-child(4) {
+#    text-align: center;       /* center image in its cell */
+#    width: 120px;             /* reserve space for thumbnails */
+#    vertical-align: middle;   /* align with row content */
+#}
+#
+##linksTable img {
+#    max-width: 100px;         /* limit thumbnail size */
+#    max-height: 80px;         /* control row height */
+#    display: inline-block;    /* don’t force block layout */
+#    object-fit: contain;      /* scale without distortion */
+#    margin: 2px auto;         /* small vertical spacing */
+#}
+
+form input, form button {
+    margin: 2px 4px;
+    padding: 6px 8px;
+    font-size: 14px;
+}
+#linksTable td > button {
+    display: inline-block;   /* make buttons sit horizontally */
+    margin: 0 2px;           /* small horizontal spacing */
+    padding: 4px 6px;        /* reduce button size */
+    font-size: 12px;         /* smaller text */
+}
+
+
+
+
 </style>
 </head>
 <body>
@@ -72,10 +137,15 @@ a:active {
   <div class="modal-content">
     <h3>Edit Link</h3>
     <input type="hidden" id="editIndex">
+    <label for="editUrl">URL</label>
     <input type="text" id="editUrl" placeholder="URL"><br>
+    <label for="editType">Type</label>    
     <input type="text" id="editType" placeholder="Type"><br>
+    <label for="editComment">Comment</label>    
     <input type="text" id="editComment" placeholder="Comment"><br>
+    <label for="editFile">Upload New Image</label>    
     <input type="file" id="editFile" accept="image/*"><br>
+    <label for="editImage">Choose Existing Image</label>    
     <select id="editImage"></select><br><br>
     <button onclick="saveEdit()">Save</button>
     <button onclick="closeEdit()">Cancel</button>
@@ -100,6 +170,27 @@ a:active {
     color: white;
     border-radius: 8px;
   }
+/* Form styling for add/edit panels */
+.modal-content label {
+    display: block;        /* put label on its own line */
+    margin-top: 8px;       /* spacing above each label */
+    font-weight: bold;     /* make it stand out */
+    font-size: 13px;
+    color: #ddd;           /* lighter text for dark mode */
+}
+
+.modal-content input,
+.modal-content select {
+    width: 100%;           /* make inputs stretch across panel */
+    padding: 6px 8px;
+    margin-top: 2px;       /* small gap below label */
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #222;
+    color: #eee;
+    font-size: 14px;
+}
+
 </style>
 
 
@@ -131,9 +222,13 @@ async function loadLinks() {
       <td>${link.type || ""}</td>
       <td>${link.comment || ""}</td>
       <td>${link.image ? `<img src="${link.image}">` : ""}</td>
-      <td>
-        <button onclick="showEdit(${idx})">Edit</button>
-        <button onclick="deleteLink(${idx})">Delete</button>
+      <td class="actions">
+        <div>
+          <button onclick="showEdit(${idx})">Edit</button>
+          <button onclick="deleteLink(${idx})">Delete</button>
+          <button class="moveUp" data-index="${idx}">↑</button>
+          <button class="moveDown" data-index="${idx}">↓</button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -259,6 +354,31 @@ async function saveEdit() {
     alert("Failed to update link");
   }
 }
+
+
+async function moveLink(index, direction) {
+  const resp = await fetch(`/links/${index}/move`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ direction })
+  });
+  if (resp.ok) loadLinks(); // refresh table
+  else alert("Move failed");
+}
+
+// Add event delegation
+document.querySelector("#linksTable tbody").addEventListener("click", (e) => {
+  if (e.target.classList.contains("moveUp")) {
+    const index = parseInt(e.target.dataset.index);
+    moveLink(index, "up");
+  }
+  if (e.target.classList.contains("moveDown")) {
+    const index = parseInt(e.target.dataset.index);
+    moveLink(index, "down");
+  }
+});
+
+
 
 // --- Initial load ---
 window.addEventListener("DOMContentLoaded", () => {
