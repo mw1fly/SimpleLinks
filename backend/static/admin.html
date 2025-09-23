@@ -228,7 +228,7 @@ async function loadEngines() {
     select.appendChild(opt);
   });
 
-  // Show selected engine details
+  // Show current engine in textboxes
   const selectedEngine = engines.find(e => e.name === current) || {};
   nameInput.value = selectedEngine.name || "";
   urlInput.value = selectedEngine.url || "";
@@ -257,7 +257,7 @@ document.getElementById("engineForm").addEventListener("submit", async (e) => {
   });
 
   if (resp.ok) {
-    loadEngines();
+    await loadEngines();
     alert("Engine added/updated!");
   } else {
     alert("Failed to add/update engine");
@@ -276,7 +276,7 @@ document.getElementById("deleteEngine").addEventListener("click", async () => {
   });
 
   if (resp.ok) {
-    loadEngines();
+    await loadEngines();
     alert("Engine deleted!");
   } else {
     alert("Failed to delete engine");
@@ -297,10 +297,7 @@ document.getElementById("setActiveEngine").addEventListener("click", async () =>
 
   if (resp.ok) {
     alert(`Active engine set to ${selected}`);
-    loadEngines();       // refresh dropdown + fields
-    if (typeof setupSearchBar === "function") {
-      setupSearchBar();  // refresh topnav logo + search
-    }
+    setupSearchBar(); // updates topnav
   } else {
     alert("Failed to set active engine");
   }

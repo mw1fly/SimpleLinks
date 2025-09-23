@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder="static", static_url_path="")
 app.secret_key = os.environ.get("SECRET_KEY", "devkey123")  # fallback for testing
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "changeme")
 
-# --- Config ---
+# --- Config paths ---
 UPLOAD_FOLDER = os.path.join("static", "images")
 ALLOWED_EXTENSIONS = {"webp", "png", "jpg", "jpeg", "gif"}
 DATA_FILE = os.path.join(os.path.dirname(__file__), "data", "links.json")
@@ -20,9 +20,11 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "data", "config.json")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
+
 # --- Helpers ---
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def load_links():
     if os.path.exists(DATA_FILE):
@@ -30,113 +32,97 @@ def load_links():
             return json.load(f)
     return []
 
+
 def save_links(links):
     with open(DATA_FILE, "w") as f:
         json.dump(links, f, indent=2)
 
+
 def load_config():
-    if os.path.exists(CONFIG_FILE):
+    try:
         with open(CONFIG_FILE, "r") as f:
-            return json.load(f)
-    # Default config
-    return {"search": {"engine": "google", "url": "https://www.google.com/search?q="}}
+            cfg = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        cfg = {"search": {"engine": "google", "engines": []}}
+
+    # Migration/cleanup: ensure engines list exists, drop legacy keys
+    search = cfg.setdefault("search", {})
+    search.setdefault("engine", "google")
+    search.setdefault("engines", [])
+    if "url" in search:  # legacy field
+        search.pop("url", None)
+
+    return cfg
+
 
 def save_config(cfg):
     with open(CONFIG_FILE, "w") as f:
         json.dump(cfg, f, indent=2)
 
+
+# --- Config routes ---
 @app.route("/config", methods=["GET"])
 def get_config():
-    cfg = load_config()
-    return jsonify(cfg)
+    return jsonify(load_config())
+
 
 @app.route("/config", methods=["POST"])
-def update_config():
+def save_whole_config():
     cfg = request.json
     save_config(cfg)
-    return jsonify({"status": "success"})
+    return jsonify({"status": "ok"})
 
 
-# --- Helpers for search engines ---
-def get_engines():
-    cfg = load_config()
-    return cfg.get("search", {}).get("engines", [])
-
-def add_engine(name, url, logo):
-    cfg = load_config()
-    if "search" not in cfg:
-        cfg["search"] = {}
-    if "engines" not in cfg["search"]:
-        cfg["search"]["engines"] = []
-
-    # Prevent duplicate names
-    for e in cfg["search"]["engines"]:
-        if e["name"].lower() == name.lower():
-            raise ValueError("Engine already exists")
-
-    cfg["search"]["engines"].append({"name": name, "url": url, "logo": logo})
-    save_config(cfg)
-
-def update_engine(name, url=None, logo=None):
-    cfg = load_config()
-    for e in cfg.get("search", {}).get("engines", []):
-        if e["name"].lower() == name.lower():
-            if url: e["url"] = url
-            if logo: e["logo"] = logo
-            save_config(cfg)
-            return
-    raise ValueError("Engine not found")
-
-def remove_engine(name):
-    cfg = load_config()
-    engines = cfg.get("search", {}).get("engines", [])
-    cfg["search"]["engines"] = [e for e in engines if e["name"].lower() != name.lower()]
-    save_config(cfg)
-
-
-# --- Manage search engines ---
 @app.route("/config/engines", methods=["POST"])
-def add_update_engine():
+def add_or_update_engine():
     data = request.json
-    name = data.get("name")
-    url = data.get("url")
-    logo = data.get("logo")
+    name, url, logo = data.get("name"), data.get("url"), data.get("logo")
+
     if not all([name, url, logo]):
         return jsonify({"error": "Missing fields"}), 400
-    try:
-        engines = get_engines()
-        # Check if exists
-        for e in engines:
-            if e["name"].lower() == name.lower():
-                e.update({"url": url, "logo": logo})
-                save_config(load_config())
-                break
-        else:
-            add_engine(name, url, logo)
-        return jsonify({"status": "ok"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+
+    cfg = load_config()
+    engines = cfg["search"].get("engines", [])
+
+    # Replace if exists, otherwise append
+    for e in engines:
+        if e["name"].lower() == name.lower():
+            e.update({"url": url, "logo": logo})
+            break
+    else:
+        engines.append({"name": name, "url": url, "logo": logo})
+
+    cfg["search"]["engines"] = engines
+    save_config(cfg)
+    return jsonify({"status": "ok"})
+
 
 @app.route("/config/engines/<string:name>", methods=["DELETE"])
 def delete_engine(name):
-    try:
-        remove_engine(name)
-        return jsonify({"status": "ok"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    cfg = load_config()
+    engines = cfg["search"].get("engines", [])
+    engines = [e for e in engines if e["name"].lower() != name.lower()]
+
+    # If the active engine was deleted, unset it
+    if cfg["search"].get("engine") == name:
+        cfg["search"]["engine"] = ""
+
+    cfg["search"]["engines"] = engines
+    save_config(cfg)
+    return jsonify({"status": "ok"})
+
 
 @app.route("/config/active", methods=["POST"])
 def set_active_engine():
     data = request.json
-    engine_name = data.get("engine")
-    cfg = load_config()
-    engines = cfg.get("search", {}).get("engines", [])
+    engine = data.get("engine")
 
-    # Validate selected engine exists
-    if not any(e["name"] == engine_name for e in engines):
+    cfg = load_config()
+    engines = cfg["search"].get("engines", [])
+    if engine not in [e["name"] for e in engines]:
         return jsonify({"error": "Engine not found"}), 400
 
-    cfg.setdefault("search", {})["engine"] = engine_name
+    cfg["search"]["engine"] = engine
     save_config(cfg)
     return jsonify({"status": "ok"})
 
@@ -156,10 +142,12 @@ def upload_file():
         return jsonify({"message": "File uploaded", "path": f"images/{filename}"}), 201
     return jsonify({"error": "Invalid file type"}), 400
 
-# --- API Endpoints ---
+
+# --- Links API ---
 @app.route("/links", methods=["GET"])
 def get_links():
     return jsonify(load_links())
+
 
 @app.route("/links", methods=["POST"])
 def add_link():
@@ -168,6 +156,7 @@ def add_link():
     links.append(new_link)
     save_links(links)
     return jsonify({"status": "success", "link": new_link}), 201
+
 
 @app.route("/links/<int:index>", methods=["DELETE"])
 def delete_link(index):
@@ -178,6 +167,7 @@ def delete_link(index):
         return jsonify({"status": "deleted", "link": removed})
     return jsonify({"error": "Index out of range"}), 404
 
+
 @app.route("/links/<int:index>", methods=["PUT"])
 def update_link(index):
     links = load_links()
@@ -187,9 +177,10 @@ def update_link(index):
         return jsonify({"status": "updated", "link": links[index]})
     return jsonify({"error": "Index out of range"}), 404
 
+
 @app.route("/links/<int:index>/move", methods=["POST"])
 def move_link(index):
-    direction = request.json.get("direction")  # "up" or "down"
+    direction = request.json.get("direction")
     links = load_links()
     if 0 <= index < len(links):
         if direction == "up" and index > 0:
@@ -202,12 +193,14 @@ def move_link(index):
         return jsonify({"status": "success"})
     return jsonify({"error": "Index out of range"}), 404
 
+
 # --- Image list for picker ---
 @app.route("/images-list")
 def images_list():
     folder = os.path.join(app.static_folder, "images")
     files = os.listdir(folder) if os.path.exists(folder) else []
     return jsonify([f"images/{f}" for f in files])
+
 
 # --- Admin Authentication ---
 @app.route("/login", methods=["GET", "POST"])
@@ -230,10 +223,12 @@ def login():
         </form>
     """)
 
+
 @app.route("/logout")
 def logout():
     session.pop("logged_in", None)
     return redirect(url_for("login"))
+
 
 @app.route("/admin")
 def admin_panel():
@@ -241,12 +236,14 @@ def admin_panel():
         return redirect(url_for("login"))
     return send_from_directory(app.static_folder, "admin.html")
 
+
 # --- Frontend ---
 @app.route("/")
 def home():
     links = load_links()
     config = load_config()
     return render_template("index.html", links=links, config=config)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
